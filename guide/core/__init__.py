@@ -5,6 +5,7 @@ from guide.core.voice import VoiceProcessor
 from guide.core.knowledge import KnowledgeBase
 from guide.core.session import Session, SessionManager
 from guide.core.guide import AIGuide
+from guide.core.mcp import MCPHub, HomeAssistantMCP, PartsDatabaseMCP, MessagingMCP
 
 __all__ = [
     "VisionAnalyzer",
@@ -13,4 +14,8 @@ __all__ = [
     "Session",
     "SessionManager",
     "AIGuide",
+    "MCPHub",
+    "HomeAssistantMCP",
+    "PartsDatabaseMCP",
+    "MessagingMCP",
 ]
