@@ -1,0 +1,90 @@
+{
+  "$schema": "https://openclaw.dev/config-schema.json",
+  "name": "Guide - AI Work Assistant",
+  "description": "Real-time AI guidance for physical work tasks",
+  "version": "1.0.0",
+
+  "mcp_servers": [
+    {
+      "name": "guide",
+      "description": "AI guidance for physical work",
+      "command": "python",
+      "args": ["-m", "guide.mcp_server"],
+      "cwd": ".",
+      "env": {
+        "ANTHROPIC_API_KEY": "${ANTHROPIC_API_KEY}"
+      }
+    }
+  ],
+
+  "messaging": {
+    "platforms": {
+      "whatsapp": {
+        "enabled": true,
+        "webhook_path": "/webhooks/twilio",
+        "config": {
+          "account_sid": "${TWILIO_ACCOUNT_SID}",
+          "auth_token": "${TWILIO_AUTH_TOKEN}",
+          "phone_number": "${TWILIO_WHATSAPP_NUMBER}"
+        }
+      },
+      "telegram": {
+        "enabled": true,
+        "webhook_path": "/webhooks/telegram",
+        "config": {
+          "bot_token": "${TELEGRAM_BOT_TOKEN}"
+        }
+      },
+      "sms": {
+        "enabled": true,
+        "webhook_path": "/webhooks/twilio",
+        "config": {
+          "account_sid": "${TWILIO_ACCOUNT_SID}",
+          "auth_token": "${TWILIO_AUTH_TOKEN}",
+          "phone_number": "${TWILIO_PHONE_NUMBER}"
+        }
+      }
+    }
+  },
+
+  "tools": {
+    "guide_start_session": {
+      "description": "Start a new guidance session",
+      "auto_invoke": true,
+      "triggers": ["help me with", "how do I", "I need to"]
+    },
+    "guide_analyze_image": {
+      "description": "Analyze an image for guidance",
+      "auto_invoke": true,
+      "triggers": ["[image received]"]
+    }
+  },
+
+  "personas": {
+    "default": {
+      "name": "Guide",
+      "system_prompt": "You are Guide, an AI assistant that helps workers complete physical tasks safely and efficiently. You can see through their camera and provide real-time guidance.",
+      "voice": {
+        "tts_provider": "openai",
+        "voice_id": "nova",
+        "speed": 1.0
+      }
+    }
+  },
+
+  "safety": {
+    "content_filters": ["weapons", "illegal_activities"],
+    "max_images_per_minute": 10,
+    "require_user_consent": true
+  },
+
+  "integrations": {
+    "home_assistant": {
+      "enabled": false,
+      "base_url": "${HOME_ASSISTANT_URL}",
+      "token": "${HOME_ASSISTANT_TOKEN}",
+      "auto_safety": true,
+      "allowed_domains": ["switch", "light", "climate", "lock"]
+    }
+  }
+}

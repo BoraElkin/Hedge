@@ -236,6 +236,131 @@ class HVACVisionAnalyzer(VisionAnalyzer):
         )
 ```
 
+## MCP Integration
+
+Guide supports the [Model Context Protocol (MCP)](https://modelcontextprotocol.io) for connecting to external tools and services.
+
+### Built-in MCP Servers
+
+| Server | What it does |
+|--------|-------------|
+| **HomeAssistantMCP** | Control smart devices — turn off power, HVAC, locks |
+| **PartsDatabaseMCP** | Look up part specs, find replacements, check inventory |
+| **MessagingMCP** | Send via WhatsApp/Slack/Teams, alert supervisors |
+
+### Using MCP Tools
+
+```python
+from guide.core import MCPHub, HomeAssistantMCP, PartsDatabaseMCP
+from guide.core.tool_guide import SmartGuide
+
+# Set up MCP hub with servers
+hub = MCPHub()
+hub.register(HomeAssistantMCP(
+    base_url="http://homeassistant.local:8123",
+    token="your-token"
+))
+hub.register(PartsDatabaseMCP())
+
+# Create guide with tool use
+guide = SmartGuide(mcp_hub=hub)
+
+# Now the guide can automatically:
+# - Turn off power before electrical work
+# - Look up parts when it sees them
+# - Alert supervisors when worker is stuck
+```
+
+### Running Guide as MCP Server
+
+Guide can also run as an MCP server, allowing other tools (like OpenClaw) to connect:
+
+```bash
+python -m guide.mcp_server
+```
+
+This exposes Guide's capabilities as MCP tools:
+- `start_session` — Start a new guidance session
+- `analyze_image` — Send image for AI analysis
+- `send_message` — Get guidance from text
+- `next_step` — Advance to next step
+- `list_procedures` — Browse available procedures
+
+## OpenClaw Integration
+
+[OpenClaw](https://github.com/openclaw/openclaw) enables Guide to work through any messaging platform.
+
+### Setup
+
+1. Copy the config file:
+```bash
+cp openclaw.config.json ~/.openclaw/configs/guide.json
+```
+
+2. Set environment variables:
+```bash
+export ANTHROPIC_API_KEY=your-key
+export TELEGRAM_BOT_TOKEN=your-token  # optional
+export TWILIO_ACCOUNT_SID=your-sid    # optional
+```
+
+3. Run with OpenClaw:
+```bash
+openclaw run guide
+```
+
+### Architecture with OpenClaw
+
+```
+┌──────────────┐     ┌──────────────┐     ┌──────────────┐
+│   Worker's   │────▶│   OpenClaw   │────▶│    Guide     │
+│   WhatsApp   │◀────│   (router)   │◀────│  (MCP server)│
+└──────────────┘     └──────────────┘     └──────────────┘
+                            │
+              ┌─────────────┼─────────────┐
+              ▼             ▼             ▼
+        ┌──────────┐  ┌──────────┐  ┌──────────┐
+        │ Telegram │  │   SMS    │  │  Slack   │
+        └──────────┘  └──────────┘  └──────────┘
+```
+
+Workers interact through their preferred app → OpenClaw routes to Guide → Guide provides AI guidance.
+
+## Messaging Bridges
+
+Guide includes native messaging bridges for direct integration (without OpenClaw):
+
+### Twilio (SMS + WhatsApp)
+
+```python
+from guide.bridges import WebhookHandler, TwilioBridge
+
+handler = WebhookHandler(session_manager, guide)
+handler.add_twilio(
+    account_sid="your-sid",
+    auth_token="your-token",
+    phone_number="+1234567890",
+    whatsapp_number="+1234567890"
+)
+
+# Add to FastAPI app
+app.include_router(handler.setup())
+```
+
+### Telegram
+
+```python
+handler.add_telegram(bot_token="your-bot-token")
+```
+
+### Webhook Endpoints
+
+Once configured, webhooks are available at:
+- `POST /webhooks/twilio` — SMS and WhatsApp
+- `POST /webhooks/telegram` — Telegram bot
+- `POST /webhooks/slack` — Slack events
+- `POST /webhooks/discord` — Discord interactions
+
 ## What's Next
 
 This is a foundation. To build a production system, consider:

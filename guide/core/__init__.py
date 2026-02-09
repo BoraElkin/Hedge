@@ -6,6 +6,7 @@ from guide.core.knowledge import KnowledgeBase
 from guide.core.session import Session, SessionManager
 from guide.core.guide import AIGuide
 from guide.core.mcp import MCPHub, HomeAssistantMCP, PartsDatabaseMCP, MessagingMCP
+from guide.core.tool_guide import ToolUsingGuide, SmartGuide
 
 __all__ = [
     "VisionAnalyzer",
@@ -18,4 +19,6 @@ __all__ = [
     "HomeAssistantMCP",
     "PartsDatabaseMCP",
     "MessagingMCP",
+    "ToolUsingGuide",
+    "SmartGuide",
 ]
