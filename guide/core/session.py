@@ -47,7 +47,7 @@ class Session:
 
     id: str
     trade: str
-    created_at: datetime
+    created_at: datetime = field(default_factory=datetime.now)
     state: SessionState = SessionState.IDLE
 
     # Current task

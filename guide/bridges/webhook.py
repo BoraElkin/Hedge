@@ -261,3 +261,17 @@ class WebhookHandler:
 
         bridge = TelegramBridge(bot_token)
         self.message_router.register_bridge(bridge)
+
+    def add_slack(self, bot_token: str) -> None:
+        """Add Slack bridge."""
+        from guide.bridges.slack import SlackBridge
+
+        bridge = SlackBridge(bot_token)
+        self.message_router.register_bridge(bridge)
+
+    def add_discord(self, bot_token: str, application_id: str | None = None) -> None:
+        """Add Discord bridge."""
+        from guide.bridges.discord import DiscordBridge
+
+        bridge = DiscordBridge(bot_token, application_id)
+        self.message_router.register_bridge(bridge)

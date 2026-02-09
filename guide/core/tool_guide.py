@@ -21,7 +21,7 @@ from guide.core.guide import AIGuide, GuideResponse
 from guide.core.knowledge import KnowledgeBase, Procedure, Step
 from guide.core.mcp import MCPHub, MCPToolResult
 from guide.core.session import Session
-from guide.core.vision import VisionAnalyzer
+from guide.core.vision import VisionAnalyzer, VisualAnalysis
 
 
 @dataclass
@@ -180,7 +180,7 @@ Keep your responses concise. Workers need quick, actionable guidance."""
     def _build_messages(
         self,
         session: Session,
-        analysis,
+        analysis: VisualAnalysis | None,
         user_message: str | None,
     ) -> list[dict]:
         """Build messages array for Claude."""

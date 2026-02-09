@@ -73,20 +73,19 @@ class TestSession:
         session = Session(
             id="test-123",
             trade="hvac",
-            created_at=None,
         )
         assert session.id == "test-123"
         assert session.state == SessionState.IDLE
 
     def test_add_message(self):
-        session = Session(id="test", trade="general", created_at=None)
+        session = Session(id="test", trade="general")
         msg = session.add_message("user", "Hello")
         assert msg.role == "user"
         assert msg.content == "Hello"
         assert len(session.messages) == 1
 
     def test_start_procedure(self):
-        session = Session(id="test", trade="hvac", created_at=None)
+        session = Session(id="test", trade="hvac")
         session.start_procedure("hvac-filter-replace", num_steps=6)
 
         assert session.procedure_id == "hvac-filter-replace"
@@ -95,7 +94,7 @@ class TestSession:
         assert len(session.step_progress) == 6
 
     def test_advance_step(self):
-        session = Session(id="test", trade="hvac", created_at=None)
+        session = Session(id="test", trade="hvac")
         session.start_procedure("test-proc", num_steps=3)
 
         assert session.current_step == 1
@@ -104,7 +103,7 @@ class TestSession:
         assert session.step_progress[0].status == "completed"
 
     def test_advance_past_last_step(self):
-        session = Session(id="test", trade="hvac", created_at=None)
+        session = Session(id="test", trade="hvac")
         session.start_procedure("test-proc", num_steps=2)
 
         session.advance_step()  # 1 -> 2
@@ -114,7 +113,7 @@ class TestSession:
         assert session.state == SessionState.VERIFYING
 
     def test_conversation_for_llm(self):
-        session = Session(id="test", trade="general", created_at=None)
+        session = Session(id="test", trade="general")
         session.add_message("user", "Hello")
         session.add_message("assistant", "Hi there!")
         session.add_message("user", "Help me")

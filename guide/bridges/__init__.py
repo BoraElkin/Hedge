@@ -12,6 +12,8 @@ preferred messaging platform:
 from guide.bridges.base import MessageBridge, IncomingMessage, OutgoingMessage
 from guide.bridges.twilio import TwilioBridge
 from guide.bridges.telegram import TelegramBridge
+from guide.bridges.slack import SlackBridge
+from guide.bridges.discord import DiscordBridge
 from guide.bridges.webhook import WebhookHandler
 
 __all__ = [
@@ -20,5 +22,7 @@ __all__ = [
     "OutgoingMessage",
     "TwilioBridge",
     "TelegramBridge",
+    "SlackBridge",
+    "DiscordBridge",
     "WebhookHandler",
 ]
