@@ -1,6 +1,6 @@
 """Webhook handlers for messaging bridges.
 
-Integrates with FastAPI to handle incoming webhooks from various platforms.
+Integrates with FastAPI to handle incoming webhooks from Twilio and Telegram.
 """
 
 from __future__ import annotations
@@ -65,12 +65,12 @@ def _handle_message(incoming: IncomingMessage) -> OutgoingMessage | None:
         return OutgoingMessage(
             recipient_id=incoming.sender_id,
             text=(
-                "👋 Hi! I'm your AI work guide. I can help you with:\n\n"
-                "• HVAC repairs\n"
-                "• Plumbing fixes\n"
-                "• Electrical work\n"
-                "• General repairs\n\n"
-                "Tell me what you're trying to do, or send a photo of what you're looking at!"
+                "Hi! I'm your AI work guide. I can help you with:\n\n"
+                "- HVAC repairs\n"
+                "- Plumbing fixes\n"
+                "- Electrical work\n"
+                "- General repairs\n\n"
+                "Tell me what you're trying to do, or send a photo of what you're looking at."
             ),
         )
 
@@ -78,14 +78,14 @@ def _handle_message(incoming: IncomingMessage) -> OutgoingMessage | None:
         return OutgoingMessage(
             recipient_id=incoming.sender_id,
             text=(
-                "📖 *Commands:*\n\n"
-                "• Send a photo - I'll analyze it and guide you\n"
-                "• Type your question - I'll help you out\n"
-                "• Say 'next' - Move to next step\n"
-                "• Say 'repeat' - Repeat current instruction\n"
-                "• Say 'help' - Get more details on current step\n"
-                "• Say 'stop' - End current session\n\n"
-                "Just tell me what you're working on to get started!"
+                "Commands:\n\n"
+                "- Send a photo - I'll analyze it and guide you\n"
+                "- Type your question - I'll help you out\n"
+                "- Say 'next' - Move to next step\n"
+                "- Say 'repeat' - Repeat current instruction\n"
+                "- Say 'help' - Get more details on current step\n"
+                "- Say 'stop' - End current session\n\n"
+                "Just tell me what you're working on to get started."
             ),
         )
 
@@ -97,7 +97,7 @@ def _handle_message(incoming: IncomingMessage) -> OutgoingMessage | None:
 
         return OutgoingMessage(
             recipient_id=incoming.sender_id,
-            text="Session ended. Stay safe! 👋\n\nSay 'start' to begin a new session.",
+            text="Session ended. Stay safe!\n\nSay 'start' to begin a new session.",
         )
 
     # Create session if needed
@@ -130,7 +130,7 @@ def _handle_message(incoming: IncomingMessage) -> OutgoingMessage | None:
     else:
         return OutgoingMessage(
             recipient_id=incoming.sender_id,
-            text="I didn't understand that. Send me a photo or tell me what you're working on!",
+            text="I didn't understand that. Send me a photo or tell me what you're working on.",
         )
 
     # Build response message
@@ -138,11 +138,11 @@ def _handle_message(incoming: IncomingMessage) -> OutgoingMessage | None:
 
     # Add step indicator if in procedure
     if response.current_step and response.total_steps:
-        reply_text = f"📍 *Step {response.current_step}/{response.total_steps}*\n\n{reply_text}"
+        reply_text = f"Step {response.current_step}/{response.total_steps}\n\n{reply_text}"
 
     # Add warnings
     if response.warnings:
-        warning_text = "\n".join(f"⚠️ {w}" for w in response.warnings)
+        warning_text = "\n".join(f"WARNING: {w}" for w in response.warnings)
         reply_text = f"{warning_text}\n\n{reply_text}"
 
     return OutgoingMessage(
@@ -151,7 +151,7 @@ def _handle_message(incoming: IncomingMessage) -> OutgoingMessage | None:
     )
 
 
-# --- Platform-specific webhook endpoints ---
+# --- Webhook endpoints ---
 
 
 @router.post("/twilio")
@@ -178,43 +178,6 @@ async def telegram_webhook(request: Request):
 
     payload = await request.json()
     await _message_router.handle_incoming("telegram", payload)
-
-    return Response(status_code=200)
-
-
-@router.post("/slack")
-async def slack_webhook(request: Request):
-    """Handle Slack webhooks (events API)."""
-    if not _message_router:
-        return Response(status_code=503)
-
-    payload = await request.json()
-
-    # Handle Slack URL verification
-    if payload.get("type") == "url_verification":
-        return {"challenge": payload.get("challenge")}
-
-    # Handle events
-    event = payload.get("event", {})
-    if event.get("type") == "message" and not event.get("bot_id"):
-        await _message_router.handle_incoming("slack", payload)
-
-    return Response(status_code=200)
-
-
-@router.post("/discord")
-async def discord_webhook(request: Request):
-    """Handle Discord webhooks (interactions)."""
-    if not _message_router:
-        return Response(status_code=503)
-
-    payload = await request.json()
-
-    # Handle Discord ping
-    if payload.get("type") == 1:
-        return {"type": 1}
-
-    await _message_router.handle_incoming("discord", payload)
 
     return Response(status_code=200)
 
@@ -260,18 +223,4 @@ class WebhookHandler:
         from guide.bridges.telegram import TelegramBridge
 
         bridge = TelegramBridge(bot_token)
-        self.message_router.register_bridge(bridge)
-
-    def add_slack(self, bot_token: str) -> None:
-        """Add Slack bridge."""
-        from guide.bridges.slack import SlackBridge
-
-        bridge = SlackBridge(bot_token)
-        self.message_router.register_bridge(bridge)
-
-    def add_discord(self, bot_token: str, application_id: str | None = None) -> None:
-        """Add Discord bridge."""
-        from guide.bridges.discord import DiscordBridge
-
-        bridge = DiscordBridge(bot_token, application_id)
         self.message_router.register_bridge(bridge)
