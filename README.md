@@ -2,8 +2,6 @@
 
 **Real-time AI guidance for physical work.**
 
-> "I know Kung Fu." — Neo, The Matrix
-
 What if any worker could gain expert-level skills instantly? Not through years of training, but through an AI that sees what they see and talks them through the job in real-time.
 
 Guide is the foundation for building that future.
