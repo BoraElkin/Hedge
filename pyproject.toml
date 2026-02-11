@@ -15,7 +15,7 @@ dependencies = [
     "livekit-plugins-google>=0.2.0",
     "livekit-plugins-silero>=0.6.0",
     # Google Gemini for vision (chat mode)
-    "google-generativeai>=0.4.0",
+    "google-genai>=1.0.0",
     "Pillow>=10.0.0",
     # Supabase for auth and database
     "supabase>=2.3.0",
@@ -24,10 +24,19 @@ dependencies = [
     # Data validation
     "pydantic>=2.5.0",
     "pydantic-settings>=2.1.0",
+    "email-validator>=2.0.0",
     # Utilities
     "python-dotenv>=1.0.0",
     "httpx>=0.26.0",
 ]
+
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["backend*", "guide*"]
+exclude = ["mobile*", "tests*", "docs*", "scripts*"]
 
 [project.optional-dependencies]
 dev = [

@@ -403,14 +403,14 @@ async def send_message(
 
     # For text-only messages, use Gemini text model
     try:
-        import google.generativeai as genai
+        from google import genai
+        from google.genai import types
 
         api_key = os.getenv("GOOGLE_API_KEY")
         if not api_key:
             raise HTTPException(status_code=500, detail="Google API not configured")
 
-        genai.configure(api_key=api_key)
-        model = genai.GenerativeModel("gemini-2.0-flash-exp")
+        client = genai.Client(api_key=api_key)
 
         # Build prompt with context
         from backend.agent.prompts import get_system_prompt
@@ -423,9 +423,10 @@ The technician asks: {request.message}
 
 Respond helpfully and concisely. If you need to see something to give good advice, ask them to send a photo."""
 
-        response = model.generate_content(
-            prompt,
-            generation_config=genai.types.GenerationConfig(
+        response = client.models.generate_content(
+            model="gemini-2.0-flash-exp",
+            contents=prompt,
+            config=types.GenerateContentConfig(
                 temperature=0.7,
                 max_output_tokens=1024,
             ),

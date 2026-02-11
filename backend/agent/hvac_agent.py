@@ -22,9 +22,8 @@ from livekit.agents import (
     JobProcess,
     WorkerOptions,
     cli,
-    llm,
 )
-from livekit.agents.pipeline import VoicePipelineAgent
+from livekit.agents.voice import Agent as VoiceAgent
 from livekit.plugins import google, silero
 
 from .prompts import get_system_prompt, TASK_TEMPLATES
@@ -77,23 +76,22 @@ async def entrypoint(ctx: JobContext) -> None:
     # Create voice activity detection
     vad = silero.VAD.load()
 
-    # Create the voice pipeline agent
+    # Create the voice agent
     # This handles the full loop: video/audio in -> Gemini -> voice out
-    agent = VoicePipelineAgent(
+    agent = VoiceAgent(
+        instructions=system_prompt,
         vad=vad,
-        stt=None,  # Gemini handles speech-to-text internally
         llm=model,
-        tts=None,  # Gemini handles text-to-speech internally
     )
 
-    # Start the agent - it now sees video + hears audio
+    # Start the agent session - it now sees video + hears audio
     # and responds with voice automatically
-    agent.start(ctx.room, participant)
+    session = agent.start(ctx.room, participant)
 
     logger.info("Agent started - now providing real-time guidance")
 
     # Keep the agent running until the session ends
-    await agent.wait()
+    await session.wait()
 
     logger.info("Session ended")
 

@@ -11,7 +11,8 @@ import io
 import os
 from dataclasses import dataclass, field
 
-import google.generativeai as genai
+from google import genai
+from google.genai import types
 from PIL import Image
 
 from .prompts import get_system_prompt
@@ -40,8 +41,8 @@ class GeminiVision:
         if not api_key:
             raise ValueError("GOOGLE_API_KEY environment variable not set")
 
-        genai.configure(api_key=api_key)
-        self._model = genai.GenerativeModel("gemini-2.0-flash-exp")
+        self._client = genai.Client(api_key=api_key)
+        self._model = "gemini-2.0-flash-exp"
 
     def resize_if_needed(self, image_data: bytes, max_size: int = 1568) -> bytes:
         """Resize image if larger than max_size while preserving aspect ratio."""
@@ -81,23 +82,23 @@ class GeminiVision:
 
         # Build the prompt
         system_prompt = get_system_prompt(task_template, task_context)
-
         user_prompt = self._build_analysis_prompt(task_context, user_message)
 
         # Create image part for Gemini
-        image_part = {
-            "mime_type": "image/jpeg",
-            "data": base64.b64encode(image_data).decode("utf-8"),
-        }
+        image_part = types.Part.from_bytes(
+            data=image_data,
+            mime_type="image/jpeg",
+        )
 
         # Call Gemini
-        response = self._model.generate_content(
-            [
+        response = self._client.models.generate_content(
+            model=self._model,
+            contents=[
                 system_prompt,
                 image_part,
                 user_prompt,
             ],
-            generation_config=genai.types.GenerationConfig(
+            config=types.GenerateContentConfig(
                 temperature=0.7,
                 max_output_tokens=1024,
             ),
@@ -113,14 +114,15 @@ class GeminiVision:
         """Quick visual check - ask a simple question about the image."""
         image_data = self.resize_if_needed(image_data)
 
-        image_part = {
-            "mime_type": "image/jpeg",
-            "data": base64.b64encode(image_data).decode("utf-8"),
-        }
+        image_part = types.Part.from_bytes(
+            data=image_data,
+            mime_type="image/jpeg",
+        )
 
-        response = self._model.generate_content(
-            [image_part, question],
-            generation_config=genai.types.GenerationConfig(
+        response = self._client.models.generate_content(
+            model=self._model,
+            contents=[image_part, question],
+            config=types.GenerateContentConfig(
                 temperature=0.5,
                 max_output_tokens=512,
             ),
