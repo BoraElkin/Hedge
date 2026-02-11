@@ -16,6 +16,8 @@ A new tech can become effective on day one, with AI coaching them through: "That
 
 ## How It Works
 
+### Call Mode (Hands-free, Real-time Video)
+
 ```
 ┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
 │   Technician's  │────▶│  LiveKit Cloud  │────▶│   AI Agent      │
@@ -30,6 +32,23 @@ A new tech can become effective on day one, with AI coaching them through: "That
 3. AI sees the video stream in real-time (1-2 FPS)
 4. AI speaks guidance through earbuds
 5. Tech works hands-free with expert guidance
+
+### Chat Mode (Photo Upload, Lower Bandwidth)
+
+```
+┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
+│   Technician    │────▶│   REST API      │────▶│  Gemini Vision  │
+│   Takes Photo   │     │   (FastAPI)     │     │                 │
+│                 │◀────│                 │◀────│                 │
+└─────────────────┘     └─────────────────┘     └─────────────────┘
+       Photo              Image Upload            Text Response
+```
+
+1. Tech takes a photo of what they're looking at
+2. Uploads to API with optional question
+3. AI analyzes the image
+4. Returns text guidance
+5. Good for quick questions or poor connectivity
 
 ## Tech Stack
 
@@ -48,7 +67,8 @@ A new tech can become effective on day one, with AI coaching them through: "That
 hvac-copilot/
 ├── backend/
 │   ├── agent/
-│   │   ├── hvac_agent.py      # LiveKit Agent — core AI loop
+│   │   ├── hvac_agent.py      # LiveKit Agent — call mode (real-time video)
+│   │   ├── vision.py          # Gemini Vision — chat mode (image upload)
 │   │   └── prompts.py         # System prompts & task templates
 │   ├── api/
 │   │   ├── main.py            # FastAPI app
@@ -116,6 +136,22 @@ Pre-built guidance for common HVAC jobs:
 | `contactor_replacement` | Replace contactor |
 | `blower_motor` | Service or replace blower motor |
 
+## Two Modes
+
+### Call Mode (Real-time Video)
+Full hands-free experience with real-time video streaming. The AI sees continuous video and responds with voice.
+
+```
+Phone Camera ──▶ LiveKit (WebRTC) ──▶ Gemini Live ──▶ Voice Response
+```
+
+### Chat Mode (Image Upload)
+Lower bandwidth option for quick questions. Send photos and get text responses.
+
+```
+Photo ──▶ REST API ──▶ Gemini Vision ──▶ Text Response
+```
+
 ## API Endpoints
 
 ### Authentication
@@ -123,10 +159,16 @@ Pre-built guidance for common HVAC jobs:
 - `POST /auth/login` — Sign in, get JWT
 - `GET /auth/me` — Get current user
 
-### Sessions
-- `POST /sessions/start` — Start guidance session (returns LiveKit token)
+### Sessions (Call Mode — Real-time Video)
+- `POST /sessions/start` — Start video session (returns LiveKit token)
 - `POST /sessions/{id}/end` — End session, save rating
 - `GET /sessions/history` — List past sessions
+
+### Sessions (Chat Mode — Image Upload)
+- `POST /sessions/chat/start` — Start chat session (no LiveKit)
+- `POST /sessions/{id}/image` — Upload photo for analysis
+- `POST /sessions/{id}/message` — Send text message
+- `POST /sessions/{id}/end` — End session
 
 ### Tasks
 - `GET /tasks` — List task templates
