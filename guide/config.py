@@ -17,14 +17,17 @@ class Settings(BaseSettings):
     # API Keys
     anthropic_api_key: str = ""
     openai_api_key: str = ""
+    google_api_key: str = ""  # Gemini API key
 
     # Server
     host: str = "0.0.0.0"
     port: int = 8000
     environment: str = "development"
 
-    # AI Model
-    default_model: str = "claude-sonnet-4-20250514"
+    # AI Models
+    default_model: str = "claude-sonnet-4-20250514"  # For guidance/reasoning
+    vision_model: str = "gemini-2.0-flash"  # For vision analysis (cheaper, faster)
+    vision_provider: str = "gemini"  # "gemini" or "claude"
 
     # Session limits
     max_images_per_session: int = 100

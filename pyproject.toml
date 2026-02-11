@@ -1,23 +1,29 @@
 [project]
-name = "guide"
+name = "hvac-copilot"
 version = "0.1.0"
-description = "Real-time AI guidance for physical work"
+description = "Real-time AI guidance for HVAC technicians"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
-    "anthropic>=0.42.0",
-    "fastapi>=0.115.0",
-    "uvicorn[standard]>=0.32.0",
-    "websockets>=13.0",
-    "python-multipart>=0.0.12",
-    "pydantic>=2.9.0",
-    "pydantic-settings>=2.5.0",
-    "httpx>=0.27.0",
-    "pillow>=10.4.0",
-    "numpy>=1.26.0",
+    # Web framework
+    "fastapi>=0.109.0",
+    "uvicorn[standard]>=0.27.0",
+    "python-multipart>=0.0.6",
+    # LiveKit for real-time video/audio
+    "livekit>=0.11.0",
+    "livekit-agents>=0.8.0",
+    "livekit-plugins-google>=0.2.0",
+    "livekit-plugins-silero>=0.6.0",
+    # Supabase for auth and database
+    "supabase>=2.3.0",
+    # Payments
+    "stripe>=7.0.0",
+    # Data validation
+    "pydantic>=2.5.0",
+    "pydantic-settings>=2.1.0",
+    # Utilities
     "python-dotenv>=1.0.0",
-    "rich>=13.9.0",
-    "openai>=1.50.0",
+    "httpx>=0.26.0",
 ]
 
 [project.optional-dependencies]
@@ -26,9 +32,22 @@ dev = [
     "pytest-asyncio>=0.24.0",
     "ruff>=0.7.0",
 ]
+rag = [
+    # RAG for Phase 2
+    "langchain>=0.1.0",
+    "langchain-openai>=0.0.5",
+    "pgvector>=0.2.0",
+]
+# Legacy guide module (being phased out)
+legacy = [
+    "anthropic>=0.42.0",
+    "pillow>=10.4.0",
+    "numpy>=1.26.0",
+    "openai>=1.50.0",
+]
 
 [project.scripts]
-guide = "guide.cli:main"
+hvac-agent = "backend.agent.hvac_agent:main"
 
 [tool.ruff]
 line-length = 100
