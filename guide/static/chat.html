@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Guide</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --bg: #f5f5f5;
+            --chat-bg: #ffffff;
+            --user-bubble: #007AFF;
+            --ai-bubble: #E9E9EB;
+            --user-text: #ffffff;
+            --ai-text: #000000;
+            --border: #e0e0e0;
+            --warning: #FF9500;
+            --danger: #FF3B30;
+            --success: #34C759;
+        }
+
+        html, body {
+            height: 100%;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+        }
+
+        .app {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+            background: var(--chat-bg);
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            background: var(--chat-bg);
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-info {
+            flex: 1;
+        }
+
+        .header-title {
+            font-size: 17px;
+            font-weight: 600;
+        }
+
+        .header-status {
+            font-size: 12px;
+            color: #8e8e93;
+        }
+
+        .header-btn {
+            width: 36px;
+            height: 36px;
+            border: none;
+            background: none;
+            font-size: 20px;
+            cursor: pointer;
+            border-radius: 50%;
+        }
+
+        .header-btn:hover {
+            background: var(--bg);
+        }
+
+        /* Progress bar */
+        .progress-bar {
+            display: none;
+            padding: 8px 16px;
+            background: #f0f8ff;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .progress-bar.active {
+            display: block;
+        }
+
+        .progress-text {
+            font-size: 13px;
+            color: #007AFF;
+            font-weight: 500;
+            margin-bottom: 6px;
+        }
+
+        .progress-track {
+            height: 4px;
+            background: #d1e7ff;
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: #007AFF;
+            border-radius: 2px;
+            transition: width 0.3s ease;
+        }
+
+        /* Messages area */
+        .messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .message {
+            display: flex;
+            flex-direction: column;
+            max-width: 85%;
+            animation: fadeIn 0.2s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .message.user {
+            align-self: flex-end;
+        }
+
+        .message.ai {
+            align-self: flex-start;
+        }
+
+        .bubble {
+            padding: 10px 14px;
+            border-radius: 18px;
+            font-size: 16px;
+            line-height: 1.4;
+            word-wrap: break-word;
+        }
+
+        .message.user .bubble {
+            background: var(--user-bubble);
+            color: var(--user-text);
+            border-bottom-right-radius: 4px;
+        }
+
+        .message.ai .bubble {
+            background: var(--ai-bubble);
+            color: var(--ai-text);
+            border-bottom-left-radius: 4px;
+        }
+
+        .message .image-container {
+            max-width: 240px;
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 4px;
+        }
+
+        .message .image-container img {
+            width: 100%;
+            display: block;
+        }
+
+        .message.user .image-container {
+            border-bottom-right-radius: 4px;
+        }
+
+        /* Warning messages */
+        .warning-bubble {
+            background: #FFF3CD;
+            border-left: 4px solid var(--warning);
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-size: 14px;
+            color: #856404;
+        }
+
+        /* Typing indicator */
+        .typing {
+            display: none;
+            align-self: flex-start;
+        }
+
+        .typing.active {
+            display: flex;
+        }
+
+        .typing .bubble {
+            display: flex;
+            gap: 4px;
+            padding: 12px 16px;
+        }
+
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            background: #8e8e93;
+            border-radius: 50%;
+            animation: typingBounce 1.4s ease-in-out infinite;
+        }
+
+        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes typingBounce {
+            0%, 60%, 100% { transform: translateY(0); }
+            30% { transform: translateY(-4px); }
+        }
+
+        /* Input area */
+        .input-area {
+            padding: 8px 12px;
+            background: var(--chat-bg);
+            border-top: 1px solid var(--border);
+            display: flex;
+            align-items: flex-end;
+            gap: 8px;
+        }
+
+        .input-actions {
+            display: flex;
+            gap: 4px;
+        }
+
+        .action-btn {
+            width: 36px;
+            height: 36px;
+            border: none;
+            background: none;
+            font-size: 22px;
+            cursor: pointer;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #007AFF;
+        }
+
+        .action-btn:hover {
+            background: var(--bg);
+        }
+
+        .action-btn:active {
+            transform: scale(0.95);
+        }
+
+        .input-wrapper {
+            flex: 1;
+            display: flex;
+            align-items: flex-end;
+            background: var(--bg);
+            border-radius: 20px;
+            padding: 8px 12px;
+            min-height: 36px;
+        }
+
+        .input-wrapper textarea {
+            flex: 1;
+            border: none;
+            background: none;
+            font-size: 16px;
+            font-family: inherit;
+            resize: none;
+            max-height: 120px;
+            line-height: 1.4;
+            outline: none;
+        }
+
+        .send-btn {
+            width: 32px;
+            height: 32px;
+            border: none;
+            background: #007AFF;
+            color: white;
+            border-radius: 50%;
+            font-size: 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.2s;
+        }
+
+        .send-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .send-btn:not(:disabled):hover {
+            background: #0056b3;
+        }
+
+        /* Quick actions */
+        .quick-actions {
+            display: none;
+            padding: 8px 12px;
+            gap: 8px;
+            overflow-x: auto;
+            background: var(--chat-bg);
+            border-top: 1px solid var(--border);
+        }
+
+        .quick-actions.active {
+            display: flex;
+        }
+
+        .quick-btn {
+            flex-shrink: 0;
+            padding: 8px 16px;
+            border: 1px solid var(--border);
+            background: white;
+            border-radius: 18px;
+            font-size: 14px;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .quick-btn:hover {
+            background: var(--bg);
+        }
+
+        .quick-btn.primary {
+            background: #007AFF;
+            color: white;
+            border-color: #007AFF;
+        }
+
+        /* Onboarding */
+        .onboarding {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 32px;
+            text-align: center;
+        }
+
+        .onboarding.hidden {
+            display: none;
+        }
+
+        .onboarding-icon {
+            font-size: 64px;
+            margin-bottom: 24px;
+        }
+
+        .onboarding h2 {
+            font-size: 24px;
+            margin-bottom: 12px;
+        }
+
+        .onboarding p {
+            color: #666;
+            margin-bottom: 24px;
+            line-height: 1.5;
+        }
+
+        .trade-select {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            justify-content: center;
+            margin-bottom: 24px;
+        }
+
+        .trade-btn {
+            padding: 12px 20px;
+            border: 2px solid var(--border);
+            background: white;
+            border-radius: 12px;
+            font-size: 15px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .trade-btn:hover {
+            border-color: #007AFF;
+        }
+
+        .trade-btn.selected {
+            border-color: #007AFF;
+            background: #f0f8ff;
+        }
+
+        .start-btn {
+            padding: 14px 32px;
+            background: #007AFF;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 17px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .start-btn:hover {
+            background: #0056b3;
+        }
+
+        /* Camera preview */
+        .camera-preview {
+            display: none;
+            position: fixed;
+            bottom: 70px;
+            left: 12px;
+            right: 12px;
+            max-width: 576px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.15);
+            padding: 12px;
+            z-index: 200;
+        }
+
+        .camera-preview.active {
+            display: block;
+        }
+
+        .camera-preview img {
+            width: 100%;
+            max-height: 200px;
+            object-fit: contain;
+            border-radius: 8px;
+        }
+
+        .camera-preview-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .preview-btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .preview-btn.cancel {
+            background: #f0f0f0;
+        }
+
+        .preview-btn.send {
+            background: #007AFF;
+            color: white;
+        }
+
+        /* Hidden file input */
+        #camera-input {
+            display: none;
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .app {
+                max-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app">
+        <!-- Header -->
+        <div class="header">
+            <div class="header-info">
+                <div class="header-title">Guide</div>
+                <div class="header-status" id="status">Ready to help</div>
+            </div>
+            <button class="header-btn" id="menu-btn" title="Menu">⚙️</button>
+        </div>
+
+        <!-- Progress bar -->
+        <div class="progress-bar" id="progress-bar">
+            <div class="progress-text" id="progress-text">Step 1 of 6</div>
+            <div class="progress-track">
+                <div class="progress-fill" id="progress-fill" style="width: 16%"></div>
+            </div>
+        </div>
+
+        <!-- Onboarding -->
+        <div class="onboarding" id="onboarding">
+            <div class="onboarding-icon">🔧</div>
+            <h2>What are you working on?</h2>
+            <p>I can guide you through repairs, installations, and maintenance tasks step by step.</p>
+            <div class="trade-select">
+                <button class="trade-btn selected" data-trade="general">General</button>
+                <button class="trade-btn" data-trade="hvac">HVAC</button>
+                <button class="trade-btn" data-trade="plumbing">Plumbing</button>
+                <button class="trade-btn" data-trade="electrical">Electrical</button>
+            </div>
+            <button class="start-btn" id="start-btn">Start</button>
+        </div>
+
+        <!-- Messages -->
+        <div class="messages hidden" id="messages">
+            <!-- Typing indicator -->
+            <div class="message ai typing" id="typing">
+                <div class="bubble">
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick actions -->
+        <div class="quick-actions" id="quick-actions">
+            <button class="quick-btn primary" data-action="next">✓ Done</button>
+            <button class="quick-btn" data-action="help">Need help</button>
+            <button class="quick-btn" data-action="repeat">Repeat</button>
+        </div>
+
+        <!-- Camera preview -->
+        <div class="camera-preview" id="camera-preview">
+            <img id="preview-image" src="" alt="Preview">
+            <div class="camera-preview-actions">
+                <button class="preview-btn cancel" id="cancel-preview">Cancel</button>
+                <button class="preview-btn send" id="send-preview">Send Photo</button>
+            </div>
+        </div>
+
+        <!-- Input area -->
+        <div class="input-area hidden" id="input-area">
+            <div class="input-actions">
+                <button class="action-btn" id="camera-btn" title="Take photo">📷</button>
+            </div>
+            <div class="input-wrapper">
+                <textarea id="message-input" placeholder="Describe what you need help with..." rows="1"></textarea>
+            </div>
+            <button class="send-btn" id="send-btn" disabled title="Send">➤</button>
+        </div>
+
+        <input type="file" id="camera-input" accept="image/*" capture="environment">
+    </div>
+
+    <script>
+        // State
+        let sessionId = null;
+        let ws = null;
+        let selectedTrade = 'general';
+        let pendingImage = null;
+        let currentStep = 0;
+        let totalSteps = 0;
+
+        // Elements
+        const onboarding = document.getElementById('onboarding');
+        const messagesContainer = document.getElementById('messages');
+        const inputArea = document.getElementById('input-area');
+        const quickActions = document.getElementById('quick-actions');
+        const progressBar = document.getElementById('progress-bar');
+        const messageInput = document.getElementById('message-input');
+        const sendBtn = document.getElementById('send-btn');
+        const cameraBtn = document.getElementById('camera-btn');
+        const cameraInput = document.getElementById('camera-input');
+        const cameraPreview = document.getElementById('camera-preview');
+        const previewImage = document.getElementById('preview-image');
+        const typing = document.getElementById('typing');
+        const status = document.getElementById('status');
+
+        // Trade selection
+        document.querySelectorAll('.trade-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.trade-btn').forEach(b => b.classList.remove('selected'));
+                btn.classList.add('selected');
+                selectedTrade = btn.dataset.trade;
+            });
+        });
+
+        // Start session
+        document.getElementById('start-btn').addEventListener('click', startSession);
+
+        async function startSession() {
+            try {
+                const resp = await fetch('/sessions', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ trade: selectedTrade })
+                });
+                const data = await resp.json();
+                sessionId = data.session_id;
+
+                // Connect WebSocket
+                const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+                ws = new WebSocket(`${protocol}//${window.location.host}/ws/${sessionId}`);
+                ws.onmessage = handleMessage;
+                ws.onclose = () => {
+                    status.textContent = 'Disconnected';
+                };
+
+                // Show chat UI
+                onboarding.classList.add('hidden');
+                messagesContainer.classList.remove('hidden');
+                inputArea.classList.remove('hidden');
+                status.textContent = 'Connected';
+
+                // Add welcome message
+                addMessage('ai', "Hi! I'm your AI guide. Tell me what you're working on, or take a photo of what you're looking at.");
+
+            } catch (err) {
+                console.error('Failed to start session:', err);
+                alert('Failed to connect. Please try again.');
+            }
+        }
+
+        // Handle incoming messages
+        function handleMessage(event) {
+            const data = JSON.parse(event.data);
+            hideTyping();
+
+            if (data.type === 'guidance') {
+                addMessage('ai', data.message);
+
+                // Update progress
+                if (data.current_step && data.total_steps) {
+                    currentStep = data.current_step;
+                    totalSteps = data.total_steps;
+                    updateProgress(currentStep, totalSteps, data.step_instruction);
+                    quickActions.classList.add('active');
+                }
+            } else if (data.type === 'warning') {
+                addWarning(data.warnings);
+            } else if (data.type === 'error') {
+                addMessage('ai', `Error: ${data.message}`);
+            }
+        }
+
+        // Add message to chat
+        function addMessage(role, text, imageUrl = null) {
+            const msg = document.createElement('div');
+            msg.className = `message ${role}`;
+
+            let html = '';
+            if (imageUrl) {
+                html += `<div class="image-container"><img src="${imageUrl}" alt="Photo"></div>`;
+            }
+            if (text) {
+                html += `<div class="bubble">${escapeHtml(text)}</div>`;
+            }
+
+            msg.innerHTML = html;
+            messagesContainer.insertBefore(msg, typing);
+            scrollToBottom();
+        }
+
+        // Add warning message
+        function addWarning(warnings) {
+            const msg = document.createElement('div');
+            msg.className = 'message ai';
+            msg.innerHTML = `<div class="warning-bubble">⚠️ ${warnings.map(escapeHtml).join('<br>⚠️ ')}</div>`;
+            messagesContainer.insertBefore(msg, typing);
+            scrollToBottom();
+        }
+
+        // Update progress bar
+        function updateProgress(current, total, instruction) {
+            progressBar.classList.add('active');
+            document.getElementById('progress-text').textContent = `Step ${current} of ${total}: ${instruction || ''}`;
+            document.getElementById('progress-fill').style.width = `${(current / total) * 100}%`;
+        }
+
+        // Show/hide typing indicator
+        function showTyping() {
+            typing.classList.add('active');
+            scrollToBottom();
+        }
+
+        function hideTyping() {
+            typing.classList.remove('active');
+        }
+
+        // Scroll to bottom
+        function scrollToBottom() {
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        // Escape HTML
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Send message
+        function sendMessage() {
+            const text = messageInput.value.trim();
+            if (!text && !pendingImage) return;
+
+            if (pendingImage) {
+                // Send image with optional text
+                addMessage('user', text || null, pendingImage.dataUrl);
+                showTyping();
+                ws.send(JSON.stringify({
+                    type: 'image',
+                    data: pendingImage.base64,
+                    message: text || undefined
+                }));
+                clearPendingImage();
+            } else {
+                // Text only
+                addMessage('user', text);
+                showTyping();
+
+                // Check if this is the first message (task description)
+                if (messagesContainer.querySelectorAll('.message.user').length === 1) {
+                    ws.send(JSON.stringify({
+                        type: 'start',
+                        task: text
+                    }));
+                } else {
+                    ws.send(JSON.stringify({
+                        type: 'message',
+                        text: text
+                    }));
+                }
+            }
+
+            messageInput.value = '';
+            messageInput.style.height = 'auto';
+            sendBtn.disabled = true;
+        }
+
+        // Send button
+        sendBtn.addEventListener('click', sendMessage);
+
+        // Enter to send (shift+enter for newline)
+        messageInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+
+        // Auto-resize textarea
+        messageInput.addEventListener('input', () => {
+            messageInput.style.height = 'auto';
+            messageInput.style.height = Math.min(messageInput.scrollHeight, 120) + 'px';
+            sendBtn.disabled = !messageInput.value.trim() && !pendingImage;
+        });
+
+        // Camera
+        cameraBtn.addEventListener('click', () => {
+            cameraInput.click();
+        });
+
+        cameraInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const dataUrl = e.target.result;
+                const base64 = dataUrl.split(',')[1];
+
+                pendingImage = { dataUrl, base64 };
+                previewImage.src = dataUrl;
+                cameraPreview.classList.add('active');
+                sendBtn.disabled = false;
+            };
+            reader.readAsDataURL(file);
+            cameraInput.value = '';
+        });
+
+        // Preview actions
+        document.getElementById('cancel-preview').addEventListener('click', clearPendingImage);
+        document.getElementById('send-preview').addEventListener('click', () => {
+            sendMessage();
+        });
+
+        function clearPendingImage() {
+            pendingImage = null;
+            cameraPreview.classList.remove('active');
+            sendBtn.disabled = !messageInput.value.trim();
+        }
+
+        // Quick actions
+        document.querySelectorAll('.quick-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const action = btn.dataset.action;
+                showTyping();
+                ws.send(JSON.stringify({
+                    type: 'command',
+                    command: action
+                }));
+            });
+        });
+
+        // Menu button (placeholder)
+        document.getElementById('menu-btn').addEventListener('click', () => {
+            if (confirm('End this session?')) {
+                if (ws) ws.close();
+                location.reload();
+            }
+        });
+    </script>
+</body>
+</html>

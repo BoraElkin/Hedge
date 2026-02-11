@@ -7,9 +7,12 @@ import base64
 import json
 from typing import Any
 
+from pathlib import Path
+
 from fastapi import FastAPI, File, Form, HTTPException, UploadFile, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, StreamingResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
 from guide.config import get_settings
@@ -32,6 +35,11 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Static files for chat UI
+static_dir = Path(__file__).parent.parent / "static"
+if static_dir.exists():
+    app.mount("/static", StaticFiles(directory=str(static_dir)), name="static")
 
 # Global instances
 session_manager = SessionManager()
@@ -429,7 +437,19 @@ async def websocket_endpoint(websocket: WebSocket, session_id: str):
         ws_manager.disconnect(session_id)
 
 
-# --- Demo UI ---
+# --- Chat UI ---
+
+
+@app.get("/chat", response_class=HTMLResponse)
+async def chat_ui():
+    """Modern mobile-first chat UI."""
+    chat_file = Path(__file__).parent.parent / "static" / "chat.html"
+    if chat_file.exists():
+        return HTMLResponse(content=chat_file.read_text())
+    raise HTTPException(status_code=404, detail="Chat UI not found")
+
+
+# --- Demo UI (Legacy) ---
 
 
 @app.get("/demo", response_class=HTMLResponse)
