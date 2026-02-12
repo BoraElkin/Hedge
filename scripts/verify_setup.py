@@ -52,7 +52,7 @@ def test_google_api() -> tuple[bool, str]:
 def test_supabase() -> tuple[bool, str]:
     """Test Supabase connection."""
     url = os.getenv("SUPABASE_URL")
-    key = os.getenv("SUPABASE_ANON_KEY")
+    key = os.getenv("SUPABASE_PUBLISHABLE_KEY") or os.getenv("SUPABASE_ANON_KEY")
 
     if not url or url.startswith("https://your-"):
         return False, "URL not configured"
@@ -112,7 +112,7 @@ def main():
     env_checks = [
         ("GOOGLE_API_KEY", True),
         ("SUPABASE_URL", True),
-        ("SUPABASE_ANON_KEY", True),
+        ("SUPABASE_PUBLISHABLE_KEY", True),
         ("LIVEKIT_URL", True),
         ("LIVEKIT_API_KEY", True),
         ("LIVEKIT_API_SECRET", True),

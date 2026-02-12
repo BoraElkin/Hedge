@@ -15,7 +15,7 @@ router = APIRouter()
 def get_supabase() -> Client:
     """Get Supabase client."""
     url = os.getenv("SUPABASE_URL")
-    key = os.getenv("SUPABASE_ANON_KEY")
+    key = os.getenv("SUPABASE_PUBLISHABLE_KEY") or os.getenv("SUPABASE_ANON_KEY")
     if not url or not key:
         raise HTTPException(status_code=500, detail="Supabase not configured")
     return create_client(url, key)
