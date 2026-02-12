@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>HVAC Copilot</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+    <div id="app">
+        <!-- Header -->
+        <header class="header">
+            <h1>HVAC Copilot</h1>
+            <div class="task-selector">
+                <select id="taskTemplate">
+                    <option value="general">General Assistance</option>
+                    <option value="thermostat_install">Thermostat Install</option>
+                    <option value="ac_not_cooling">AC Not Cooling</option>
+                    <option value="furnace_no_heat">Furnace No Heat</option>
+                    <option value="refrigerant_check">Refrigerant Check</option>
+                    <option value="duct_inspection">Duct Inspection</option>
+                    <option value="electrical_diagnosis">Electrical Diagnosis</option>
+                    <option value="filter_replacement">Filter Replacement</option>
+                    <option value="compressor_check">Compressor Check</option>
+                </select>
+            </div>
+        </header>
+
+        <!-- Step Progress Indicator -->
+        <div id="stepProgress" class="step-progress hidden">
+            <div class="step-info">
+                <span id="stepNumber">Step 1</span>
+                <span id="stepDescription">Getting started...</span>
+            </div>
+            <div class="progress-bar">
+                <div id="progressFill" class="progress-fill" style="width: 0%"></div>
+            </div>
+        </div>
+
+        <!-- Chat Messages -->
+        <main class="chat-container" id="chatContainer">
+            <div class="welcome-message">
+                <div class="ai-avatar">AI</div>
+                <div class="message-content">
+                    <p>Hi! I'm your HVAC Copilot. Take a photo of what you're working on, and I'll help guide you through the job.</p>
+                    <p class="hint">Select a task type above, then tap the camera to get started.</p>
+                </div>
+            </div>
+        </main>
+
+        <!-- Input Area -->
+        <footer class="input-area">
+            <!-- Image Preview -->
+            <div id="imagePreview" class="image-preview hidden">
+                <img id="previewImg" src="" alt="Preview">
+                <button id="removeImage" class="remove-image">&times;</button>
+            </div>
+
+            <!-- Input Row -->
+            <div class="input-row">
+                <button id="cameraBtn" class="icon-btn camera-btn" title="Take Photo">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+                        <circle cx="12" cy="13" r="4"/>
+                    </svg>
+                </button>
+                <input type="file" id="cameraInput" accept="image/*" capture="environment" hidden>
+
+                <input type="text" id="messageInput" placeholder="Ask a question..." autocomplete="off">
+
+                <button id="voiceBtn" class="icon-btn voice-btn" title="Voice Input (Coming Soon)">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+                        <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+                        <line x1="12" y1="19" x2="12" y2="23"/>
+                        <line x1="8" y1="23" x2="16" y2="23"/>
+                    </svg>
+                </button>
+
+                <button id="sendBtn" class="icon-btn send-btn" title="Send">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="22" y1="2" x2="11" y2="13"/>
+                        <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+                    </svg>
+                </button>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay hidden">
+        <div class="spinner"></div>
+        <p>Analyzing...</p>
+    </div>
+
+    <script src="/static/app.js"></script>
+</body>
+</html>

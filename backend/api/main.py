@@ -5,17 +5,24 @@ Handles:
 - Session management
 - Task templates
 - Usage tracking for free tier limits
+- Static file serving for web chat UI
 """
 
 from __future__ import annotations
 
 import os
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 
 from .routes import auth, sessions, tasks, usage
+
+# Static files directory
+STATIC_DIR = Path(__file__).parent.parent / "static"
 
 
 @asynccontextmanager
@@ -76,3 +83,17 @@ async def health():
             "database": "up",  # TODO: Actually check Supabase
         },
     }
+
+
+# Mount static files for web chat UI
+if STATIC_DIR.exists():
+    app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
+
+
+@app.get("/chat")
+async def chat_ui():
+    """Serve the web chat UI."""
+    index_file = STATIC_DIR / "index.html"
+    if index_file.exists():
+        return FileResponse(index_file)
+    return {"error": "Chat UI not found. Static files may not be installed."}
